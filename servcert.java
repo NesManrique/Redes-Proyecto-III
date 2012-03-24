@@ -5,48 +5,92 @@ import java.net.*;
 
 public class servcert{
 
-    public static void main(String args[]){
-        int servport = 5000;
-        String dir = null;
-        String bushost = null;
-        int busport = 4000;
-
-        Socket busqsocket = null;
-        ServerSocket listsocket = null;
-        PrintWriter out = null;
-        BufferedReader in = null; 
-        String inputLine, outputLine;
-        Certf p = new Certf();
-
-
-        if(args.length==8 && args[0].equals("-p") && args[2].equals("-d") && args[4].equals("-h") && args[6].equals("-b")){
-            servport = Integer.parseInt(args[1]);
-            dir = args[3];
-            bushost = args[5];
-            busport = Integer.parseInt(args[7]); 
-        }else if(args.length==6 && args[0].equals("-p") && args[2].equals("-d") && args[4].equals("-h")){
-            servport = Integer.parseInt(args[1]);
-            dir = args[3];
-            bushost = args[5];
-        }else if(args.length==6 && args[0].equals("-d") && args[2].equals("-h") && args[4].equals("-b")){
-            dir = args[1];
-            bushost = args[3];
-            busport = Integer.parseInt(args[5]); 
-        }else if(args.length==4 && args[0].equals("-d") && args[2].equals("-h")){
-            dir = args[1];
-            bushost = args[3];
-        }else if(args.length==1 && args[0].equals("-help")){
+    static int parser(String args[], StringBuilder dir, StringBuilder host, int busport, StringBuilder servport){
+        int i;
+        if(args.length==1 && args[0].equals("--help")){
             System.out.println("Uso: java servcert [-p <puerto>] -d <directorio que almacena los certificados> -h <nombre de dominio de buscert>");
             System.out.println("\t\t[-b <puerto de escucha de buscCert>]\n");
             System.out.println("\t<puerto>: puerto de escucha de peticiones de sercert. 5000 por default.");
             System.out.println("\t<directorio que almacena los certificados>: contiene el camino absoluto o relativo \n\t\t del directorio donde estarán los certificados del repositorio.");
             System.out.println("\t<nombre de dominio de buscert>: ip o nombre de dominio de buscert");
             System.out.println("\t<puerto de escucha de buscert>: puerto de escucha del buscador. 4000 por default.");
+
+            return 0;
+        }else if(args.length % 2 == 0 && args.length >5){
+
+            for(i=0; i<args.length; i++){
+
+                if(args[i+1].charAt(0)=='-'){
+                    System.err.print("Error en las opciones: Falta valor de algunos argumentos. ");
+                    return -1;
+                }else if(args[i].equals("-d")){
+                    dir.append(args[++i]);
+                }else if(args[i].equals("-h")){
+                    host.append(args[++i]);
+                }else if(args[i].equals("-b")){
+                    try{
+                        busport = Integer.parseInt(args[++i]);
+                    }catch(NumberFormatException n){
+                        System.err.print("Error en las opciones: "+n.getMessage()+" ");
+                        return -1;
+                    }
+                }else if(args[i].equals("-p")){
+                    try{
+                        servport.append(Integer.parseInt(args[++i]));
+                    }catch(NumberFormatException n){
+                        System.err.print("Error en las opciones: "+n.getMessage()+" ");
+                        return -1;
+                    }
+                }else{
+                    System.err.print("Error en las opciones: Opcion invalida. ");
+                    return -1;
+                }
+            }
+
+            return busport;
+
+        }else{
+            System.err.print("Error en las opciones: Faltan argumentos. ");
+            return -1;
+        }
+
+    }
+
+    public static void main(String args[]){
+        int servport = 5000;
+        int busport = 4000;
+        String dir = null;
+        String bushost = null;
+        StringBuilder d = new StringBuilder();
+        StringBuilder host = new StringBuilder();
+        StringBuilder serv = new StringBuilder();
+
+        busport = parser(args,d,host,busport,serv);
+
+        if(busport > 0){
+            dir = d.toString();
+            bushost = host.toString();
+            servport = Integer.parseInt(serv.toString());
+        }else if(busport == 0){
             System.exit(0);
         }else{
-            System.out.println("Error en las opciones. Para ver una ayuda ejecute java servcert -help");
+            System.out.println("Para ver una ayuda ejecute java clicert -help");
             System.exit(1);
         }
+
+        if(dir.charAt(dir.length()-1)!='/') dir = dir+"/";
+        System.out.println("dir dond guardar los certificados "+dir
+                            +"\nip o nombre del buscador "+bushost
+                            +"\npuerto de escucha del buscador "+busport
+                            +"\npuerto de escucha del servidor "+servport+"\n");
+
+/*
+        Socket busqsocket = null;
+        ServerSocket listsocket = null;
+        PrintWriter out = null;
+        BufferedReader in = null; 
+        String inputLine, outputLine;
+        Certf p = new Certf();
 
         //LLeno la lista de certificados
         List<Certf> lc = Collections.synchronizedList(new ArrayList<Certf>());
@@ -101,6 +145,6 @@ public class servcert{
                 System.err.println("Error cerrando la conexion");
                 continue;
             }
-        }
+        }*/
     }
 }
