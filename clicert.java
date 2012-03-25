@@ -1,6 +1,8 @@
 //import nanoxml.*;
+import java.util.*;
 import java.io.*;
 import java.net.*;
+import java.rmi.*;
 
 public class clicert{
 
@@ -71,6 +73,39 @@ public class clicert{
         System.out.println("dir dond guardar los certificados "+dir
                             +"\nip o nombre del buscador "+bushost
                             +"\npuerto de escucha del buscador "+busport+"\n");
+
+        String direccionBus = "rmi://"+bushost+":"+busport+"/buscert";
+
+        System.out.println(direccionBus);
+
+        OperBus opbus = null;
+
+        try{
+            opbus = (OperBus) Naming.lookup(direccionBus);
+        }catch(MalformedURLException murle) {
+            System.out.println();
+            System.out.println(
+              "MalformedURLException");
+            System.out.println(murle);
+        }
+        catch(RemoteException re) {
+            System.out.println();
+            System.out.println(
+                        "RemoteException");
+            System.out.println(re);
+        }
+        catch(NotBoundException nbe) {
+            System.out.println();
+            System.out.println(
+                       "NotBoundException");
+            System.out.println(nbe);
+        }
+
+        //List<Certf> lc = Collections.synchronizedList(new ArrayList<Certf>());
+        List<String> lc = opbus.OperPrueba("HOLA");
+
+        System.out.println(lc.get(0)+" asdsad");
+        
 /*
         BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
 
