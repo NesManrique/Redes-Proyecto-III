@@ -1,9 +1,30 @@
 import java.util.*;
 import java.io.*;
 import java.net.*;
+import java.rmi.*;
 //import nanoxml.*;
 
-public class servcert{
+public class servcert extends java.rmi.server.UnicastRemoteObject implements OperServ{
+
+    static OperBus operbus;
+    static String host;
+    static int port;
+    
+    public servcert(OperBus opbus, String servhost, int servport) throws java.rmi.RemoteException{
+        super();
+        operbus=opbus;
+        host = servhost;
+        port = servport;
+    }
+
+    public List<String> OperPrueba(String asd){
+
+        List<String> lc = Collections.synchronizedList(new ArrayList<String>());
+
+        lc.add(asd);
+
+        return lc;
+    }
 
     static int parser(String args[], StringBuilder dir, StringBuilder host, int busport, StringBuilder servport){
         int i;
@@ -16,8 +37,9 @@ public class servcert{
             System.out.println("\t<puerto de escucha de buscert>: puerto de escucha del buscador. 4000 por default.");
 
             return 0;
-        }else if(args.length % 2 == 0 && args.length >5){
+        }else if(args.length % 2 == 0 && args.length >3){
 
+            servport.append("5000");
             for(i=0; i<args.length; i++){
 
                 if(args[i+1].charAt(0)=='-'){
@@ -55,6 +77,80 @@ public class servcert{
         }
 
     }
+    public static void conectar(String bushost, int busport, int puertoclientes){
+
+        //Creacion del objeto remoto del buscador para inscribir el servidor
+        String direccionBus = "rmi://"+bushost+":"+busport+"/buscert";
+        System.out.println("Servidor registrandose a: "+direccionBus);
+
+        OperBus opbus = null;
+
+        try{
+            opbus = (OperBus)Naming.lookup(direccionBus);
+        }catch(MalformedURLException murle) {
+            System.out.println();
+            System.out.println(
+              "MalformedURLException");
+            System.out.println(murle);
+        }
+        catch(RemoteException re) {
+            System.out.println();
+            System.out.println(
+                        "RemoteException");
+            System.out.println(re);
+        }
+        catch(NotBoundException nbe) {
+            System.out.println();
+            System.out.println(
+                       "NotBoundException");
+            System.out.println(nbe);
+        }
+
+        String servhost="";
+        try{
+            //Sacando el servidor local
+            InetAddress addr = InetAddress.getLocalHost();
+            servhost = addr.getHostName();
+            System.out.println("Localhost: "+servhost);
+        }catch(java.net.UnknownHostException e){
+            System.err.println("Error en el host local. "+e.getMessage());
+        }
+
+        //Creacion del objeto remoto y registro para los clientes
+        try{
+            java.rmi.registry.LocateRegistry.createRegistry(puertoclientes);
+        }catch (RemoteException ex){
+            System.err.println("Error creando el registry, el puerto ya esta en uso.");
+            System.exit(-1);
+        }
+
+        OperServ operserv = null;
+        try{
+            operserv = new servcert(opbus,servhost,puertoclientes);
+        }catch(RemoteException ex){
+            System.out.println("Error en la creacion del objeto remoto.");
+        }
+
+        String dirserv = "rmi://localhost:"+puertoclientes+"/servcert";
+        System.out.println("Direccion del servidor: "+dirserv);
+        try{
+            Naming.rebind(dirserv,operserv);
+        }catch(Exception e){
+            System.err.println("Error binding. "+e);
+            System.exit(-1);
+        }
+
+        //Registrandose al buscador
+        try{
+            //Inscribiendo el servidor
+            int resp = opbus.signin(servhost,puertoclientes);
+            System.out.println("Respuesta del buscador: "+resp);
+        }catch(RemoteException r){
+            System.err.println("Error signing up: "+r.getMessage());
+            System.exit(-1);
+        }
+
+    }
 
     public static void main(String args[]){
         int servport = 5000;
@@ -84,6 +180,25 @@ public class servcert{
                             +"\npuerto de escucha del buscador "+busport
                             +"\npuerto de escucha del servidor "+servport+"\n");
 
+        conectar(bushost, busport, servport);
+
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+
+            @Override
+            public void run() {
+                try {
+                    //Sacando el servidor local
+                    InetAddress addr = InetAddress.getLocalHost();
+                    String servhost = addr.getHostName();
+                    System.out.println("Localhost a cerrar: "+servhost);
+                    //Logging out
+                    operbus.signout(servhost,port);
+                }catch (Throwable t) {
+                    System.out.println("Error reportando el cierre del "
+                    + "programa.");
+                }
+            }
+        });
 /*
         Socket busqsocket = null;
         ServerSocket listsocket = null;

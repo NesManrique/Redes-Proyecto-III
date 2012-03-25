@@ -6,14 +6,35 @@ import java.rmi.*;
 
 public class buscert extends java.rmi.server.UnicastRemoteObject implements OperBus{
 
+        List<String []> servidores = Collections.synchronizedList(new ArrayList<String []>()); 
+        List<String []> clientes = Collections.synchronizedList(new ArrayList<String []>()); 
+        List<String []> certificados = Collections.synchronizedList(new ArrayList<String []>());
+
     public buscert() throws java.rmi.RemoteException{
         super();
+    }
+
+    public int eraseServ(String host, String port){
+        int h=0; 
+        for(String a[] : servidores){
+            if(a[0].equals(host) && a[1].equals(port)){
+                break;
+            }
+            h++;
+        }
+
+        if(h>=servidores.size()){
+            return 1;
+        }else{
+            servidores.remove(h);
+            return 0;
+        }
+
     }
 
     public List<String> OperPrueba(String asd){
 
         List<String> lc = Collections.synchronizedList(new ArrayList<String>());
-
         lc.add(asd);
 
         return lc;
@@ -21,6 +42,7 @@ public class buscert extends java.rmi.server.UnicastRemoteObject implements Oper
 
     public static void conectar(int puertoclientes){
 
+        //Creación del registro y objeto remoto para los clientes
         try{
             java.rmi.registry.LocateRegistry.createRegistry(puertoclientes);
         }catch (RemoteException ex){
@@ -48,6 +70,26 @@ public class buscert extends java.rmi.server.UnicastRemoteObject implements Oper
             System.exit(-1);
         }
 
+    }
+
+    public int signin(String servhost, int servport) throws java.rmi.RemoteException{
+
+        String []a = new String[3];
+        a[0]= servhost;
+        a[1]= servport+"";
+        a[2]= "0";
+        servidores.add(a);
+        System.out.println("Inscribi el servidor: "+servhost+" con puerto: "+servport);
+        return 0;
+    }
+
+    public void signout(String servhost, int servport) throws java.rmi.RemoteException{
+
+        if(eraseServ(servhost, servport+"")==1){
+            System.err.println("Servidor: "+servhost+" con puerto: "+servport+" no inscrito");
+        }else{
+            System.err.println("Servidor: "+servhost+" con puerto: "+servport+" eliminado de la lista de servidores");
+        }
     }
 
     public static void main(String args[]){
