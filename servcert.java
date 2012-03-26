@@ -116,7 +116,6 @@ public class servcert extends java.rmi.server.UnicastRemoteObject implements Ope
             //Sacando el servidor local
             InetAddress addr = InetAddress.getLocalHost();
             servhost = addr.getHostName();
-            System.out.println("Localhost: "+servhost);
         }catch(java.net.UnknownHostException e){
             System.err.println("Error en el host local. "+e.getMessage());
         }
@@ -149,7 +148,6 @@ public class servcert extends java.rmi.server.UnicastRemoteObject implements Ope
         try{
             //Inscribiendo el servidor
             int resp = opbus.signin(servhost,puertoclientes);
-            System.out.println("Respuesta del buscador: "+resp);
         }catch(RemoteException r){
             System.err.println("Error signing up: "+r.getMessage());
             System.exit(-1);

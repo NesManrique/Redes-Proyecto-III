@@ -53,10 +53,6 @@ public class buscert extends java.rmi.server.UnicastRemoteObject implements Oper
         OperBus operbus = null;
         try{
             operbus = new buscert();
-            if(operbus!=null)
-                System.out.println("no es null");
-            else
-                System.out.println("si es que ladilla");
         }catch(RemoteException ex){
             System.out.println("Error en la creacion del objeto remoto.");
         }
@@ -135,8 +131,8 @@ public class buscert extends java.rmi.server.UnicastRemoteObject implements Oper
         a[2]="0";
 
         clientes.add(a);
-        System.out.println("Inscribi al cliente: "+host+" con id: "+a[0]);
-        return clientes.size();
+        System.out.println("Inscribi al cliente: "+a[1]+" con id: "+a[0]);
+        return clientes.size()-1;
     }
 
     public void outcli(String host, int id) throws java.rmi.RemoteException{
@@ -148,10 +144,11 @@ public class buscert extends java.rmi.server.UnicastRemoteObject implements Oper
             h++;
         }
 
-        if(h>=servidores.size()){
-            System.err.println("Cliente id: "+id+" no existe.");
+        if(h==clientes.size()){
+            //System.err.println("Cliente id: "+id+" no existe.");
         }else{
-            servidores.remove(h);
+            System.out.println("Eliminando el cliente "+h);
+            clientes.remove(h);
         }
 
     }
@@ -187,22 +184,35 @@ public class buscert extends java.rmi.server.UnicastRemoteObject implements Oper
             }
 
             certr = opserv.searchCert(query);
+            a[2] = (Integer.parseInt(a[2])+certr.size())+"";
             res.addAll(certr);
         }
 
         for(String a[] : clientes){
             if(a[0].equals(id+"")){
                 int cant = Integer.parseInt(a[2]);
-                //Certf.log(cant);
-                a[2]=(cant+1)+"";
+                a[2]=(cant+res.size())+"";
                 break;
             }
         }
 
-        /*for(String r : res){
-            Certf.log(res);
-            
-        }*/
+        for(String r : res){
+            String name = Certf.xmlName(r);
+            int h = 0;
+            for(String a[] : certificados){
+                if(a[0].equals(name)){
+                    a[1]=(Integer.parseInt(a[1])+1)+"";
+                    break;
+                }
+                h++;
+            }
+            if(h>= certificados.size()){
+                String[] c = new String[2];
+                c[0]=name;
+                c[1]="1";
+                certificados.add(c);
+            }
+        }
 
         return res;
     }
@@ -251,7 +261,7 @@ public class buscert extends java.rmi.server.UnicastRemoteObject implements Oper
                 if(est.length>1)
                     Certf.log("Certificados solicitados: "+est1(est[1]));
                 else
-                    Certf.log("Certificados solicitados"+est1(""));
+                    Certf.log("Certificados solicitados: "+est1(""));
             }else if(est[0].equals("solcli")){
                 if(est.length>1)
                     Certf.log("Certificados solicitados: "+est2(est[1]));

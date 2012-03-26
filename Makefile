@@ -4,9 +4,13 @@ JC = javac
 .java.class:
 	$(JC) $<
 
-CLASSES = Certf.class clicert.class buscert.class servcert.class busThread.class servThread.class
+CLASSES = Certf.class clicert.class buscert.class servcert.class OperBus.class OperServ.class
+RMIC = servcert_Stub.class buscert_Stub.class
 
-all: $(CLASSES)
+all: $(CLASSES) $(RMIC)
+
+$(RMIC): $(CLASSES)
+	rmic buscert servcert
 
 clean:
-	/bin/rm clicert.class buscert.class servcert.class busThread.class servThread.class Certf.class
+	/bin/rm clicert.class buscert.class servcert.class Certf.class OperBus.class OperServ.class
