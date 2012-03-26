@@ -6,9 +6,9 @@ import java.rmi.*;
 
 public class buscert extends java.rmi.server.UnicastRemoteObject implements OperBus{
 
-        List<String []> servidores = Collections.synchronizedList(new ArrayList<String []>()); 
-        List<String []> clientes = Collections.synchronizedList(new ArrayList<String []>()); 
-        List<String []> certificados = Collections.synchronizedList(new ArrayList<String []>());
+        static List<String []> servidores = Collections.synchronizedList(new ArrayList<String []>()); 
+        static List<String []> clientes = Collections.synchronizedList(new ArrayList<String []>()); 
+        static List<String []> certificados = Collections.synchronizedList(new ArrayList<String []>());
 
     public buscert() throws java.rmi.RemoteException{
         super();
@@ -72,6 +72,42 @@ public class buscert extends java.rmi.server.UnicastRemoteObject implements Oper
 
     }
 
+    public static int est1(String host){
+        if(host.equals("")){
+            return certificados.size();
+        }else{
+            for(String a[] : clientes){
+                if(a[1].equals(host)){
+                    return Integer.parseInt(a[2]);
+                }
+            }
+        }
+        return 0;
+    }
+
+    public static int est2(String cert){
+        
+        for(String a[] : certificados){
+            if(a[0].equals(cert)){
+                return Integer.parseInt(a[1]);
+            }
+        }
+
+        return 0;
+    }
+
+    public static void est3(){
+        for(String a[] : servidores){
+            System.out.println("Servidor "+a[0]+ " puerto "+a[1]+": "+ a[2]);
+        }
+    }
+
+    public static void est4(){
+        for(String a[] : certificados){
+            System.out.println(a[0]);
+        } 
+    }
+
     public int signin(String servhost, int servport) throws java.rmi.RemoteException{
 
         String []a = new String[3];
@@ -90,6 +126,85 @@ public class buscert extends java.rmi.server.UnicastRemoteObject implements Oper
         }else{
             System.err.println("Servidor: "+servhost+" con puerto: "+servport+" eliminado de la lista de servidores");
         }
+    }
+
+    public int incli(String host) throws java.rmi.RemoteException{
+        String []a = new String[3];
+        a[0]=clientes.size()+"";
+        a[1]=host;
+        a[2]="0";
+
+        clientes.add(a);
+        System.out.println("Inscribi al cliente: "+host+" con id: "+a[0]);
+        return clientes.size();
+    }
+
+    public void outcli(String host, int id) throws java.rmi.RemoteException{
+        int h=0; 
+        for(String a[] : clientes){
+            if(a[0].equals(id+"")){
+                break;
+            }
+            h++;
+        }
+
+        if(h>=servidores.size()){
+            System.err.println("Cliente id: "+id+" no existe.");
+        }else{
+            servidores.remove(h);
+        }
+
+    }
+
+    public ArrayList<String> searchCert(String query, int id) throws java.rmi.RemoteException{
+
+        ArrayList <String> res = new ArrayList<String>();
+        ArrayList <String> certr = null;
+        OperServ opserv = null;
+        String dirserv = "";
+        for(String a[] : servidores){
+
+            dirserv = "rmi://"+a[0]+":"+a[1]+"/servcert";
+            try{
+                opserv = (OperServ) Naming.lookup(dirserv);
+            }catch(MalformedURLException murle) {
+                System.out.println();
+                System.out.println(
+                        "MalformedURLException");
+                System.out.println(murle);
+            }
+            catch(RemoteException re) {
+                System.out.println();
+                System.out.println(
+                        "RemoteException");
+                System.out.println(re);
+            }
+            catch(NotBoundException nbe) {
+                System.out.println();
+                System.out.println(
+                        "NotBoundException");
+                System.out.println(nbe);
+            }
+
+            certr = opserv.searchCert(query);
+            res.addAll(certr);
+        }
+
+        for(String a[] : clientes){
+            if(a[0].equals(id+"")){
+                int cant = Integer.parseInt(a[2]);
+                //Certf.log(cant);
+                a[2]=(cant+1)+"";
+                break;
+            }
+        }
+
+        /*for(String r : res){
+            Certf.log(res);
+            
+        }*/
+
+        return res;
     }
 
     public static void main(String args[]){
@@ -114,45 +229,43 @@ public class buscert extends java.rmi.server.UnicastRemoteObject implements Oper
             System.exit(1);
         }
 
-        boolean listening=true;
-        List<String []> servidores = Collections.synchronizedList(new ArrayList<String []>()); 
-        List<String []> clientes = Collections.synchronizedList(new ArrayList<String []>()); 
-        List<String []> certificados = Collections.synchronizedList(new ArrayList<String []>());
-
         conectar(port);
 
-        /*Thread est = new Thread(new busThread(servidores,clientes,certificados,1));
-        Thread check = new Thread(new busThread(servidores,0));
-        est.start(); 
-        check.start(); 
+        boolean listening = true;
+        BufferedReader prompt = null;
+        String comando = "";
+        String[] est;
 
         while(listening){
-
-            //Abrimos Puerto para conexion con clicert y los servcert
+            System.out.print("buscert>: ");
+            prompt = new BufferedReader(new InputStreamReader(System.in));
             try{
-                busqsocket = new ServerSocket(port);
-
-            }catch (IOException e){
-                System.err.println("No se puede escuchar en el puerto: " + port);
-                System.exit(1);
+                comando = prompt.readLine();
+            }catch(Exception e){
+                System.err.println("Error leyendo el comando. Intente de nuevo.");
             }
 
-            try{
-                //Certf.log("recibi un cliente");
-                Thread t = new Thread(new busThread(busqsocket.accept(),servidores,clientes,certificados,2));
-                t.start();
-            }catch(IOException e){
-                System.err.println("Error aceptando la conexion");
-                continue;
-            }
-            
-            try{
-                busqsocket.close();
-            }catch(IOException e){
-                System.err.println("Error cerrando la conexion");
-                continue;
-            }
-        }*/
+            est = comando.split(" ");
 
+            if(est[0].equals("clicert")){
+                if(est.length>1)
+                    Certf.log("Certificados solicitados: "+est1(est[1]));
+                else
+                    Certf.log("Certificados solicitados"+est1(""));
+            }else if(est[0].equals("solcli")){
+                if(est.length>1)
+                    Certf.log("Certificados solicitados: "+est2(est[1]));
+                else
+                    Certf.log("Especifique un cliente");
+            }else if(est[0].equals("cerreq")){
+                est3(); 
+            }else if(est[0].equals("liscert")){
+                est4();
+            }else{
+                System.out.println("Comando no soportado.");
+            }
+        }
+
+        System.exit(0);
     }
 } 

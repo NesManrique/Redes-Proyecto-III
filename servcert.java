@@ -9,6 +9,11 @@ public class servcert extends java.rmi.server.UnicastRemoteObject implements Ope
     static OperBus operbus;
     static String host;
     static int port;
+    private static List<Certf> lc = Collections.synchronizedList(new ArrayList<Certf>());
+    
+    public servcert() throws java.rmi.RemoteException{
+        super();
+    }
     
     public servcert(OperBus opbus, String servhost, int servport) throws java.rmi.RemoteException{
         super();
@@ -152,6 +157,20 @@ public class servcert extends java.rmi.server.UnicastRemoteObject implements Ope
 
     }
 
+    public ArrayList<String> searchCert(String query) throws java.rmi.RemoteException{
+
+        ArrayList<String []> q = new ArrayList<String[]>();
+        ArrayList<String> encontrados = new ArrayList<String>();
+        Certf.xml2query(query,q);
+        Certf.searchCert(q,lc,encontrados);
+        int i;
+        for(i=0; i<encontrados.size(); i++){
+            encontrados.set(i,Certf.cert2xml(encontrados.get(i)));
+        }
+
+        return encontrados;
+    }
+ 
     public static void main(String args[]){
         int servport = 5000;
         int busport = 4000;
@@ -180,8 +199,16 @@ public class servcert extends java.rmi.server.UnicastRemoteObject implements Ope
                             +"\npuerto de escucha del buscador "+busport
                             +"\npuerto de escucha del servidor "+servport+"\n");
 
+        //LLeno la lista de certificados
+        Certf c = new Certf();
+        File f = new File(dir);
+        c.abrirdir(f,lc);
+        //Certf.printList(lc);
+
+        //Inscribo el servidor en el buscador
         conectar(bushost, busport, servport);
 
+        //Manejo de Ctrl+C
         Runtime.getRuntime().addShutdownHook(new Thread() {
 
             @Override
@@ -190,7 +217,7 @@ public class servcert extends java.rmi.server.UnicastRemoteObject implements Ope
                     //Sacando el servidor local
                     InetAddress addr = InetAddress.getLocalHost();
                     String servhost = addr.getHostName();
-                    System.out.println("Localhost a cerrar: "+servhost);
+                    //System.out.println("Localhost a cerrar: "+servhost);
                     //Logging out
                     operbus.signout(servhost,port);
                 }catch (Throwable t) {
@@ -199,67 +226,32 @@ public class servcert extends java.rmi.server.UnicastRemoteObject implements Ope
                 }
             }
         });
-/*
-        Socket busqsocket = null;
-        ServerSocket listsocket = null;
-        PrintWriter out = null;
-        BufferedReader in = null; 
-        String inputLine, outputLine;
-        Certf p = new Certf();
 
-        //LLeno la lista de certificados
-        List<Certf> lc = Collections.synchronizedList(new ArrayList<Certf>());
-        Certf c = new Certf();
-        File f = new File(dir);
+        boolean listening = true;
+        BufferedReader prompt = null;
+        String comando = "";
 
-        c.abrirdir(f,lc);
+        while(listening){
+            System.out.print("servcert>: ");
+            prompt = new BufferedReader(new InputStreamReader(System.in));
+            try{
+                comando = prompt.readLine();
+            }catch(Exception e){
+                System.err.println("Error leyendo el comando. Intente de nuevo.");
+            }
 
-        //c.printList(lc);
-        
-        try{
-            //Inscribo el servidor en el buscador
-            busqsocket = new Socket(bushost, busport);
-            out = new PrintWriter(busqsocket.getOutputStream(), true);
-            in = new BufferedReader(new InputStreamReader(busqsocket.getInputStream()));
-            out.println("SERVER");
-            out.println("SIGNIN");
-            out.println(servport+"");
-            out.close();
-            in.close();
-            busqsocket.close();
-        }catch(UnknownHostException e){
-            System.err.println("Error al conctarse al host: "+bushost);
-            System.exit(1);
-        }catch(IOException e){
-            System.err.println("Couldn't get I/O for the connection to: "+bushost);
-            System.exit(1);
+            if(comando.equals("quit")){
+                listening = false;
+                try{
+                    operbus.signout(host.toString(),port);
+                }catch(RemoteException r){
+                    System.err.println("Error cerrando el servidor.");
+                }
+            }else if(comando.equals("list")){
+                Certf.printList(lc);
+            }
         }
 
-        while(true){
-
-            //Abro un puerto para escuchar las peticiones del buscador
-            try{
-                listsocket = new ServerSocket(servport);
-            }catch (IOException e){
-                System.err.println("No se puede escuchar en el puerto: " + servport);
-                System.exit(1);
-            }
-
-            try{
-                //Certf.log("recibi un cliente");
-                Thread t = new Thread(new servThread(listsocket.accept(),lc));
-                t.start();
-            }catch(IOException e){
-                System.err.println("Error aceptando la conexion");
-                continue;
-            }
-            
-            try{
-                listsocket.close();
-            }catch(IOException e){
-                System.err.println("Error cerrando la conexion");
-                continue;
-            }
-        }*/
+        System.exit(0);
     }
 }

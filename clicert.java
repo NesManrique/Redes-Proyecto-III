@@ -49,11 +49,26 @@ public class clicert{
 
     }
 
+    public static void list(File dir) throws NullPointerException{
+        File files[] = dir.listFiles();
+        if(files == null){
+            throw new NullPointerException();
+        }
+        for(int i = 0; i< files.length; i++ ){
+            if(files[i].isFile()){
+                Certf.log(files[i].getPath());
+            } else if(files[i].isDirectory()){
+                list(files[i]);
+            }
+        }
+    }
+
     public static void main(String args[]) throws IOException{
 
         String dir = null;
         String bushost = null;
         int busport = 4000;
+        int id=-1;
         StringBuilder d = new StringBuilder();
         StringBuilder host = new StringBuilder();
 
@@ -101,11 +116,71 @@ public class clicert{
             System.out.println(nbe);
         }
 
-        //List<Certf> lc = Collections.synchronizedList(new ArrayList<Certf>());
-        List<String> lc = opbus.OperPrueba("HOLA");
+        String chost="";
+        try{
+            //Sacando el servidor local
+            InetAddress addr = InetAddress.getLocalHost();
+            chost = addr.getHostName().toString();
+        }catch(java.net.UnknownHostException e){
+            System.err.println("Error en el host local. "+e.getMessage());
+        }
 
-        System.out.println(lc.get(0)+" asdsad");
-        
+        try{
+            id=opbus.incli(chost);
+        }catch(Exception e){
+            System.err.println("Error al inscribirse al buscador"+e.getMessage());
+        }
+
+        boolean listening = true;
+        int ln=0;
+        BufferedReader prompt = null;
+        String comando = "";
+        String query = "";
+
+        while(listening){
+            System.out.print("clicert>: ");
+            prompt = new BufferedReader(new InputStreamReader(System.in));
+            try{
+                comando = prompt.readLine();
+            }catch(Exception e){
+                System.err.println("Error leyendo el comando. Intente de nuevo.");
+            }
+
+            if(comando.equals("")){
+               if(ln==0){
+                    ln=ln+1;
+                    System.out.println("Si inserta otra linea vacía el programa clicert terminara.");
+                }else if(ln==1){
+                    opbus.outcli(chost,id);
+                    System.exit(0);
+                }
+            }else if(comando.equals("list")){
+                ln=0;
+                try{
+                    File f = new File(dir);
+                    list(f);
+                }catch(NullPointerException n){
+                    System.err.println("Error listando certificados "+n.getMessage());
+                }
+            }else{
+                ln=0;
+                query = Certf.query2xml(comando);
+                if(query.equals("")){
+                    Certf.log("Solicitud inválida. Inténtelo de nuevo.");
+                    continue;
+                }
+                ArrayList<String> lc = opbus.searchCert(query,id);
+                
+                System.out.println("Encontrados: ");
+                //Certf.log(lc);
+                for(String r : lc){
+                    Certf.xml2cert(dir,r);
+                }
+            }
+        }
+
+        System.exit(0);
+
 /*
         BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
 

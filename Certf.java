@@ -24,7 +24,7 @@ public class Certf{
 
     }
 
-    public void printList(ArrayList<Certf> l){
+    public static void printList(List<Certf> l){
         ListIterator<Certf> it = l.listIterator();
 
         while(it.hasNext()){
@@ -116,7 +116,7 @@ public class Certf{
         System.out.println(aMessage);
     }
 
-    public String cert2xml(String filecert){
+    public static String cert2xml(String filecert){
         String all = "";
         try{
             BufferedReader input = new BufferedReader(new FileReader(filecert));
@@ -143,7 +143,7 @@ public class Certf{
         return all;
     }
 
-    public void xml2cert(String dir, String certxml){
+    public static void xml2cert(String dir, String certxml){
         String fname="";
         String content="";
         String aux="";
@@ -161,8 +161,9 @@ public class Certf{
 
         fname = ((XMLElement)v.get(0)).getName();
         content = ((XMLElement)v.get(0)).getContent();
+        //log(content);
 
-        content = content.substring(27);
+        /*content = content.substring(27);
 
         for(i=0; i<content.length(); i=i+64){
             if(i+64<content.length())
@@ -177,18 +178,19 @@ public class Certf{
 
         aux="-----BEGIN CERTIFICATE-----\n"+aux+"\n-----END CERTIFICATE-----";
 
-        //log(aux);
+        //log(aux);*/
 
         try {
             BufferedWriter out = new BufferedWriter(new FileWriter(dir+fname));
-            out.write(aux);
+            log(fname);
+            out.write(content);
             out.close();
         } catch (IOException e) {
-            log("Problema Escribiendo el archivo: "+fname);
+            log("Problema Escribiendo el archivo: "+fname+" "+e.getMessage());
         }
     }
 
-    public String xmlName(String certxml){
+    public static String xmlName(String certxml){
         Vector<XMLElement> v = new Vector<XMLElement>();
 
         XMLElement certf = new XMLElement();
@@ -217,7 +219,7 @@ public class Certf{
         return false;
     }
 
-    public String query2xml(String query){
+    public static String query2xml(String query){
 		String[] subs;
         if(query.trim().equals("")){
 			return "";
@@ -330,7 +332,7 @@ public class Certf{
         return "";
     }
 
-    public void xml2query(String xml, ArrayList<String[]> query){
+    public static void xml2query(String xml, ArrayList<String[]> query){
         XMLElement q = new XMLElement();
         q.parseString(xml); //Transformo el query en un arbol
         Vector childs = q.getChildren(); //Saco los hijos de la raiz
@@ -352,7 +354,7 @@ public class Certf{
         
     }
 
-    public void searchCert(List<String[]> query, List<Certf> cert, 
+    public static void searchCert(List<String[]> query, List<Certf> cert, 
                                 List<String> find){
         String a[];
         Certf c;
