@@ -4,6 +4,11 @@ import java.net.*;
 import java.rmi.*;
 //import nanoxml.*;
 
+/**
+ * @author Nestor Manrique
+ * @author Samuel Bartoli
+ */
+
 public class servcert extends java.rmi.server.UnicastRemoteObject implements OperServ{
 
     static OperBus operbus;
@@ -11,10 +16,21 @@ public class servcert extends java.rmi.server.UnicastRemoteObject implements Ope
     static int port;
     private static List<Certf> lc = Collections.synchronizedList(new ArrayList<Certf>());
     
+    /**
+      * Constructor vacio 
+      *
+      */
     public servcert() throws java.rmi.RemoteException{
         super();
     }
-    
+   
+    /**
+    * Constructor de la clase servcert recibe
+    * @param opbus: 
+    * @param servhost: direccion de servcert.
+    * @param servport: puerto de escucha de servcert.
+    * @throws RemoteException
+    */  
     public servcert(OperBus opbus, String servhost, int servport) throws java.rmi.RemoteException{
         super();
         operbus=opbus;
@@ -22,15 +38,14 @@ public class servcert extends java.rmi.server.UnicastRemoteObject implements Ope
         port = servport;
     }
 
-    public List<String> OperPrueba(String asd){
 
-        List<String> lc = Collections.synchronizedList(new ArrayList<String>());
-
-        lc.add(asd);
-
-        return lc;
-    }
-
+    /**
+    * Parser para interpretar correctamente la entrada por consola
+    * @param dir: directorio donde se encuentran los certificados
+    * @param host: direccion del servidor
+    * @param busport: puerto de escucha de buscert
+    * @param servport: puerto de escucha del servidor
+    */
     static int parser(String args[], StringBuilder dir, StringBuilder host, int busport, StringBuilder servport){
         int i;
         if(args.length==1 && args[0].equals("--help")){
@@ -81,6 +96,13 @@ public class servcert extends java.rmi.server.UnicastRemoteObject implements Ope
         }
 
     }
+
+    /**
+    * Establece conexion con buscert
+    * @param bushost: direccion de buscert
+    * @param busport: puerto de escucha de buscert
+    * @param puertoclientes: puerto de escucha de los clientes
+    */
     public static void conectar(String bushost, int busport, int puertoclientes){
 
         //Creacion del objeto remoto del buscador para inscribir el servidor
@@ -154,6 +176,12 @@ public class servcert extends java.rmi.server.UnicastRemoteObject implements Ope
 
     }
 
+    /**
+    * Busca el certificado  de acuerdo a los parametros especificados con sus
+    * valores
+    * @param query: parametros que determinan la busqueda del certificado
+    * @throws RemoteException
+    */
     public ArrayList<String> searchCert(String query) throws java.rmi.RemoteException{
 
         ArrayList<String []> q = new ArrayList<String[]>();
@@ -215,7 +243,6 @@ public class servcert extends java.rmi.server.UnicastRemoteObject implements Ope
                     //Sacando el servidor local
                     InetAddress addr = InetAddress.getLocalHost();
                     String servhost = addr.getHostName();
-                    //System.out.println("Localhost a cerrar: "+servhost);
                     //Logging out
                     operbus.signout(servhost,port);
                 }catch (Throwable t) {

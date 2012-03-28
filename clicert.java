@@ -1,10 +1,22 @@
-//import nanoxml.*;
+import nanoxml.*;
 import java.util.*;
 import java.io.*;
 import java.net.*;
 import java.rmi.*;
 
+/**
+ * @author Nestor Manrique
+ * @author Samuel Bartoli
+ */
+
 public class clicert{
+
+    /**
+     * Realiza el parseo de la entrada proveniente de la consola
+     * @param dir: directorio donde guarda los certificados.
+     * @param bushost: direccion de buscert.
+     * @param busport: puerto por donde escucha buscert.
+     */
 
     static int parser(String args[], StringBuilder dir, StringBuilder bushost, int busport){
         int i;
@@ -48,6 +60,12 @@ public class clicert{
         }
 
     }
+    
+    /**
+     * Lista el contenido de un directorio.
+     * @param dir: directorio a saber su contenido.
+     * @throws NullPointerException.
+     */
 
     public static void list(File dir) throws NullPointerException{
         File files[] = dir.listFiles();
@@ -62,7 +80,10 @@ public class clicert{
             }
         }
     }
-
+    
+    /**
+     * @param args: argumentos recibidos por la linea de comados
+     */
     public static void main(String args[]) throws IOException{
 
         String dir = null;
@@ -172,7 +193,6 @@ public class clicert{
                 ArrayList<String> lc = opbus.searchCert(query,id);
                 
                 System.out.println("Encontrados: ");
-                //Certf.log(lc);
                 for(String r : lc){
                     Certf.xml2cert(dir,r);
                 }
@@ -181,63 +201,5 @@ public class clicert{
 
         System.exit(0);
 
-/*
-        BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
-
-        String userInput="";
-        String query="";
-        String fromBus="";
-        String certific="";
-        Certf cc = new Certf();
-        int ln=0;
-
-        while((userInput = stdIn.readLine())!=null){
-            if(userInput.equals("")){
-                if(ln==0){
-                    ln=ln+1;
-                    System.out.println("Si inserta otra linea vacía el programa clicert terminara.");
-                }else if(ln==1){
-                    out.println("SALIDA");
-                    //System.out.println("Clicer terminara ahora.");
-                    System.exit(0);
-                }
-            }else{
-                ln=0;
-
-                //Transformar la entrada en XML
-                query = cc.query2xml(userInput);
-                //Certf.log("cliente"+query);
-
-                if(query.equals("")){
-                    Certf.log("Solicitud inválida. Inténtelo de nuevo.");
-                    continue;
-                }
-            
-                //Enviarla al buscert
-                out.println("CLIENTE");
-                out.println(query);
-                out.println("ENDCLIENTE");
-                
-                //Recibir el Certificado
-                while(!(fromBus=in.readLine()).equals("ENDBUSCADOR")){ 
-                    if(fromBus.equals("BUSCADOR")){
-                        fromBus = in.readLine();
-                        certific = certific+fromBus;
-                    }else if(fromBus.equals("ENDCERT")){
-                        //Imprimir el certificado
-                        Certf.log("Certificado guardado: "+ cc.xmlName(certific) + "\n");
-                        //Guardar el certificado
-                        cc.xml2cert(dir,certific);
-                        certific="";
-                    }else if(fromBus.equals("NOCERT")){
-                        Certf.log("No se encontraron certificados con la búsqueda especificada");
-                    }else{
-                        fromBus = "";
-                    }
-                }
-
-            }
-        }
-        stdIn.close();*/
     }
 }
