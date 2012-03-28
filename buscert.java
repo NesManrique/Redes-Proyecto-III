@@ -48,7 +48,7 @@ public class buscert extends java.rmi.server.UnicastRemoteObject implements Oper
     }
 
     /**
-    * 
+    * Agrega un certificado a la lista de certificados 
     * @param asd: 
     */
     public List<String> OperPrueba(String asd){
@@ -93,8 +93,9 @@ public class buscert extends java.rmi.server.UnicastRemoteObject implements Oper
     }
 
     /**
-    * 
-    * @param host:
+    * Obtiene las estadisticas del numero de certificados consultados en total por
+    * cliente
+    * @param host: direccion del cliente
     */
     public static int est1(String host){
         if(host.equals("")){
@@ -111,7 +112,8 @@ public class buscert extends java.rmi.server.UnicastRemoteObject implements Oper
 
 
     /**
-    *  
+    *  Obtiene las estadisticas del numero de clientes que solicitaron un
+    *  certificado particular
     * @param cert:
     */
     public static int est2(String cert){
@@ -127,7 +129,7 @@ public class buscert extends java.rmi.server.UnicastRemoteObject implements Oper
 
 
     /**
-    * 
+    * Cantidad de certificados requeridos por repositorio
     *
     */
     public static void est3(){
@@ -137,7 +139,7 @@ public class buscert extends java.rmi.server.UnicastRemoteObject implements Oper
     }
 
     /**
-    * 
+    * Obtiene los nombres de todos los certificados solicitados
     *
     */
     public static void est4(){
@@ -220,7 +222,7 @@ public class buscert extends java.rmi.server.UnicastRemoteObject implements Oper
     }
 
     /**
-    * busca un certificado del cliente ????????
+    * busca un certificado del cliente de ceierto id
     * @param query: solicitud con sus campos y valores 
     * @param id:  
     * @throws RemoteException
