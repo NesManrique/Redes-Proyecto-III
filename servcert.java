@@ -44,7 +44,6 @@ public class servcert extends java.rmi.server.UnicastRemoteObject implements Ope
             return 0;
         }else if(args.length % 2 == 0 && args.length >3){
 
-            servport.append("5000");
             for(i=0; i<args.length; i++){
 
                 if(args[i+1].charAt(0)=='-'){
@@ -183,7 +182,8 @@ public class servcert extends java.rmi.server.UnicastRemoteObject implements Ope
         if(busport > 0){
             dir = d.toString();
             bushost = host.toString();
-            servport = Integer.parseInt(serv.toString());
+            if(!serv.toString().equals(""))
+                servport = Integer.parseInt(serv.toString());
         }else if(busport == 0){
             System.exit(0);
         }else{

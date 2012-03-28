@@ -13,4 +13,4 @@ $(RMIC): $(CLASSES)
 	rmic buscert servcert
 
 clean:
-	/bin/rm clicert.class buscert.class servcert.class Certf.class OperBus.class OperServ.class
+	/bin/rm servcert_Stub.class buscert_Stub.class clicert.class buscert.class servcert.class Certf.class OperBus.class OperServ.class
