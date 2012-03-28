@@ -3,8 +3,15 @@ import java.util.*;
 import java.io.*;
 import java.net.*;
 import java.rmi.*;
+import java.security.*;
 
 public class clicert{
+
+    static KeyStore keys;
+
+    public clicert(KeyStore keys){
+        this.keys = keys;
+    }
 
     static int parser(String args[], StringBuilder dir, StringBuilder bushost, int busport){
         int i;
@@ -49,6 +56,37 @@ public class clicert{
 
     }
 
+    /*public static void beginChat(String certfile, String privtkey){
+            
+        CertificateFactory cf;
+        Certificate cert;
+        
+        try {
+            FileInputStream is = new FileInputStream(certfile);
+
+            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            Certificate cert = cf.generateCertificate(is);
+            return cert;
+        } catch (CertificateException e) {
+            System.err.println("Error en el certificado "+e.getMessage());
+        } catch (IOException e) {
+            System.err.println("Error leyendo el archivo del cert "+e.getMessage());
+        } 
+        keys = KeyStore.getInstance("JKS");
+        keys.load(null,cert.toCharArray());
+
+            InputStream fl = fullStream (keyfile);
+            byte[] key = new byte[fl.available()];
+            KeyFactory kf = KeyFactory.getInstance("RSA");
+            fl.read ( key, 0, fl.available() );
+            fl.close();
+            PKCS8EncodedKeySpec keysp = new PKCS8EncodedKeySpec ( key );
+            PrivateKey ff = kf.generatePrivate (keysp);
+
+        keys.setKeyEntry(certfile, cert.getPublicKey(),);
+        
+    }
+
     public static void list(File dir) throws NullPointerException{
         File files[] = dir.listFiles();
         if(files == null){
@@ -61,7 +99,7 @@ public class clicert{
                 list(files[i]);
             }
         }
-    }
+    }*/
 
     public static void main(String args[]) throws IOException{
 
