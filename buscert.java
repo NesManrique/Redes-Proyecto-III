@@ -4,16 +4,31 @@ import java.util.*;
 import java.rmi.*;
 //import nanoxml.*;
 
+/**
+ * @author Nestor Manrique
+ * @author Samuel Bartoli
+ */
 public class buscert extends java.rmi.server.UnicastRemoteObject implements OperBus{
 
         static List<String []> servidores = Collections.synchronizedList(new ArrayList<String []>()); 
         static List<String []> clientes = Collections.synchronizedList(new ArrayList<String []>()); 
         static List<String []> certificados = Collections.synchronizedList(new ArrayList<String []>());
 
+    /**
+    * constructor de la clase
+    * @throws RemoteException
+    *
+    */
     public buscert() throws java.rmi.RemoteException{
         super();
     }
 
+    /**
+    * Eliminar un servidor especifico
+    * @param host: direccion del servidor a eliminar
+    * @param port: puerto del servidor a eliminar 
+    *
+    */
     public int eraseServ(String host, String port){
         int h=0; 
         for(String a[] : servidores){
@@ -32,6 +47,10 @@ public class buscert extends java.rmi.server.UnicastRemoteObject implements Oper
 
     }
 
+    /**
+    * 
+    * @param asd: 
+    */
     public List<String> OperPrueba(String asd){
 
         List<String> lc = Collections.synchronizedList(new ArrayList<String>());
@@ -40,6 +59,11 @@ public class buscert extends java.rmi.server.UnicastRemoteObject implements Oper
         return lc;
     }
 
+    /**
+    *  Establece conexion con los clientes
+    *  @param puertoclientes: puerto del cliente
+    *
+    */
     public static void conectar(int puertoclientes){
 
         //Creación del registro y objeto remoto para los clientes
@@ -68,6 +92,10 @@ public class buscert extends java.rmi.server.UnicastRemoteObject implements Oper
 
     }
 
+    /**
+    * 
+    * @param host:
+    */
     public static int est1(String host){
         if(host.equals("")){
             return certificados.size();
@@ -81,6 +109,11 @@ public class buscert extends java.rmi.server.UnicastRemoteObject implements Oper
         return 0;
     }
 
+
+    /**
+    *  
+    * @param cert:
+    */
     public static int est2(String cert){
         
         for(String a[] : certificados){
@@ -92,18 +125,33 @@ public class buscert extends java.rmi.server.UnicastRemoteObject implements Oper
         return 0;
     }
 
+
+    /**
+    * 
+    *
+    */
     public static void est3(){
         for(String a[] : servidores){
             System.out.println("Servidor "+a[0]+ " puerto "+a[1]+": "+ a[2]);
         }
     }
 
+    /**
+    * 
+    *
+    */
     public static void est4(){
         for(String a[] : certificados){
             System.out.println(a[0]);
         } 
     }
 
+    /**
+    *  inscribe nuevos servidores
+    *  @param servhost: direccion del nuevo servidor
+    *  @param servport: puerto del nuevo servidor
+    *
+    */
     public int signin(String servhost, int servport) throws java.rmi.RemoteException{
 
         String []a = new String[3];
@@ -115,6 +163,13 @@ public class buscert extends java.rmi.server.UnicastRemoteObject implements Oper
         return 0;
     }
 
+    /**
+    *  Elimina un servidor que ya este inscrito
+    *  @param servhost: direccion del nuevo servidor
+    *  @param servport: puerto del nuevo servidor
+    *  @throws RemoteException
+    *
+    */
     public void signout(String servhost, int servport) throws java.rmi.RemoteException{
 
         if(eraseServ(servhost, servport+"")==1){
@@ -124,6 +179,11 @@ public class buscert extends java.rmi.server.UnicastRemoteObject implements Oper
         }
     }
 
+    /**
+    * Inscribe un nuevo cliente
+    * @param host: direccion del nuevo cliente
+    * @throws RemoteException
+    */
     public int incli(String host) throws java.rmi.RemoteException{
         String []a = new String[3];
         a[0]=clientes.size()+"";
@@ -135,6 +195,12 @@ public class buscert extends java.rmi.server.UnicastRemoteObject implements Oper
         return clientes.size()-1;
     }
 
+    /**
+    * Elimina un cliente que ya haya sido registrado
+    * @param host: direccion del cliente a eliminar
+    * @param id: identificador del cliente
+    * @throws RemoteException
+    */
     public void outcli(String host, int id) throws java.rmi.RemoteException{
         int h=0; 
         for(String a[] : clientes){
@@ -153,6 +219,12 @@ public class buscert extends java.rmi.server.UnicastRemoteObject implements Oper
 
     }
 
+    /**
+    * busca un certificado del cliente ????????
+    * @param query: solicitud con sus campos y valores 
+    * @param id:  
+    * @throws RemoteException
+    */
     public ArrayList<String> searchCert(String query, int id) throws java.rmi.RemoteException{
 
         ArrayList <String> res = new ArrayList<String>();
