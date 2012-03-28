@@ -2,18 +2,34 @@ import nanoxml.*;
 import java.io.*;
 import java.util.*;
 
+/**
+ * @author Nestor Manrique
+ * @author Samuel Bartoli
+ */
+
 public class Certf{
 
     String Fname;
     ArrayList<String> Fields;
 
+    /**
+    * Constructor vacio
+    */
     public Certf(){};
 
+    /**
+    * Constructor no vacio recibe
+    * @param fname: nombre del certificado
+    * @param fields: campos del certificado
+    */
     public Certf(String fname, ArrayList<String> fields){
         Fname=fname;
         Fields=fields;
     }
 
+    /**
+    * Imprime un certificado
+    */
     public void printcert(){
         log(this.Fname);
 
@@ -24,6 +40,10 @@ public class Certf{
 
     }
 
+    /**
+    * Imprime los certificados de una lista de certificados
+    * @param l: lista de certificados
+    */
     public static void printList(List<Certf> l){
         ListIterator<Certf> it = l.listIterator();
 
@@ -33,6 +53,12 @@ public class Certf{
         }
     }
 
+    /**
+    * Obtiene las informaciones que se encuentran codificadas dentro del
+    * certificado
+    * @param fname: nombre del certificado
+    *
+    */
     public Certf descifrado(String fname){
         String[] s = new String[6];
         ArrayList<String> ss = new ArrayList<String>();
@@ -92,7 +118,13 @@ public class Certf{
 
     }
 
-
+    /**
+    * Contruye una lista con las informaciones que se encuentran codificadas
+    * para cada certifico que se encuentre en un directorio.
+    * @param dir: nombre del directorio
+    * @param L: lista de certificados
+    *
+    */
     public void abrirdir(File dir,List<Certf> L) throws NullPointerException{
         Certf cer;
         File files[] = dir.listFiles();
@@ -112,10 +144,19 @@ public class Certf{
         }
     }
 
+    /**
+    * Funcion auxiliar que sintetiza la impresion en pantalla.
+    */
     public static void log(Object aMessage){
         System.out.println(aMessage);
     }
 
+    /**
+     * 
+     * Construye un xml a partir de un certificado
+     * @param filecert: nombre del certificado
+     *
+     */
     public static String cert2xml(String filecert){
         String all = "";
         try{
@@ -131,7 +172,6 @@ public class Certf{
         XMLElement certf = new XMLElement();
         XMLElement certname = new XMLElement();
         certf.setName("Certificate");
-        //log("bla "+filecert.replaceAll("([\\w-]*/)+",""));
         certname.setName(filecert.replaceAll("([\\w-]*/)+",""));
         certname.setContent(all);
         certf.addChild(certname);
@@ -139,10 +179,14 @@ public class Certf{
         if(all.contains("&#xa;")){
             all = all.replace("&#xa;","\n");
         }
-        //log("certificate "+all);
         return all;
     }
 
+    /**
+     * conviert un xml a un certificado
+     * @param dir: directorio del certificado
+     * @param certxml: xml a convertir
+     */
     public static void xml2cert(String dir, String certxml){
         String fname="";
         String content="";
@@ -151,34 +195,12 @@ public class Certf{
         Vector<XMLElement> v = new Vector<XMLElement>();
 
         XMLElement certf = new XMLElement();
-        //try{
             certf.parseString(certxml);
-        //}catch(XMLParseException e){
-            //log(e.getMessage());
-        //}
 
         v = (Vector<XMLElement>)certf.getChildren();
 
         fname = ((XMLElement)v.get(0)).getName();
         content = ((XMLElement)v.get(0)).getContent();
-        //log(content);
-
-        /*content = content.substring(27);
-
-        for(i=0; i<content.length(); i=i+64){
-            if(i+64<content.length())
-                aux=aux+content.substring(i,i+64)+"\n";
-            else
-                break;
-        }
-                
-        for(;content.charAt(i)!='-';i++){
-            aux=aux+content.charAt(i);
-        }
-
-        aux="-----BEGIN CERTIFICATE-----\n"+aux+"\n-----END CERTIFICATE-----";
-
-        //log(aux);*/
 
         try {
             BufferedWriter out = new BufferedWriter(new FileWriter(dir+fname));
@@ -194,11 +216,7 @@ public class Certf{
         Vector<XMLElement> v = new Vector<XMLElement>();
 
         XMLElement certf = new XMLElement();
-        //try{
             certf.parseString(certxml);
-        //}catch(XMLParseException e){
-        //    log(e.getMessage());
-        //}
 
         v = (Vector<XMLElement>)certf.getChildren();
 
@@ -219,6 +237,10 @@ public class Certf{
         return false;
     }
 
+    /**
+    * construye el xml a partir de la busqueda del usuario
+    * @param query: busqueda con campos y sus valores
+    */
     public static String query2xml(String query){
 		String[] subs;
         if(query.trim().equals("")){
@@ -308,7 +330,6 @@ public class Certf{
                     fing.setContent(subs[++i]);
                 }
             }else{
-                //log("No se de que campo es "+subs[i]);
             }
         }
 
@@ -332,6 +353,13 @@ public class Certf{
         return "";
     }
 
+    /**
+    * Extrae los valores de los campos que esten en el xml y los almacena como
+    * un arreglo de string
+    * @param xml: busqueda en formato xml
+    * @param query: contiene los valores de los campos 
+    *
+    */
     public static void xml2query(String xml, ArrayList<String[]> query){
         XMLElement q = new XMLElement();
         q.parseString(xml); //Transformo el query en un arbol
@@ -344,16 +372,22 @@ public class Certf{
             //como un arraylist de arreglos de string
             for(int i=0; i<childs.size(); i++){
                 content = ((XMLElement)childs.get(i)).getContent();
-                //if(content!=""){
                     scont = content.split("\\s+");
                     query.add(scont);
-                //}
             }
         }
 
         
     }
 
+    /**
+    * busca y devuelve el certificado correspondiente a la soliticud de acuerdo
+    * a los campos de busqueda
+    * @param query: informacion para buscar el certificado
+    * @param cert: lista que contiene los certificados
+    * @param find: arreglo con los certificados que hacen match con los
+    * parametros de busqueda
+    */
     public static void searchCert(List<String[]> query, List<Certf> cert, 
                                 List<String> find){
         String a[];
@@ -377,7 +411,6 @@ public class Certf{
 
                     if(a[j]=="") continue;
 
-                    //log("cert "+k+" atributo "+i+" valor "+a[j]+" "+(c.Fields.get(i)).contains(a[j]));
                     if(c.Fields.get(i)!="" && !(c.Fields.get(i)).contains(a[j])){
                         vflag=true;
                         break;
@@ -404,57 +437,5 @@ public class Certf{
         }
 
     }
-
-    /*public static void main(String[] args){
-
-            xmlutils p = new xmlutils();
-            String a = p.cert2xml("server1",args[0]);
-            //p.log(a);
-            p.xml2cert(a);
-
-            File dir = new File(args[0]);
-            Certf c = new Certf();
-            ArrayList<Certf> ac = new ArrayList<Certf>();
-            try{
-                c.abrirdir(dir,ac);
-            }catch(NullPointerException e){
-                log("Error leyendo directorios");
-            }
-            
-            c.printList(ac);
-            //c.query2xml("Issuer: L=Cape Validity: notBefore=Feb 25 23:30:40");
-            String asd = "";
-            String asd1 = "    \t   \t\t";
-            String asd2 = "   Issuer:   \tccs   Hash: 123456\t";
-            String asd3 = "   Habia una \t\tVEz un ISsuer derp  ";
-            String asd5 = "   Issuer: Dates: Hash:  ";
-            String asd4 = "Issuer: ccs Dates: notAfter=Feb 27 Dates: notAfter=Feb 26 Issuer: sam";
-            String algo = c.query2xml("Issuer: vln");
-			if(algo==""){ 
-				log("query vacio");
-				System.exit(0);
-			}
-            String a[];
-            //log(c.query2xml(asd));
-            ArrayList<String[]> query = new ArrayList<String[]>();
-            c.xml2query(algo,query);
-            for(int i=0; i<query.size(); i++){
-                a=query.get(i);
-                log(a.length);
-                for(int j=0; j<a.length; j++){
-                    log(a[j]);
-                }
-            }
-
-            ArrayList<String> encontrados = new ArrayList<String>();
-
-            c.searchCert(query,ac,encontrados);
-            
-            if(encontrados.size()<=0) log("no hay certificados");
-            for(int i=0; i<encontrados.size(); i++){
-                asd=encontrados.get(i);
-                log(asd);
-            }
-    }*/
 
 }

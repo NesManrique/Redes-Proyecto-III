@@ -3,6 +3,12 @@ import java.io.*;
 import java.util.*;
 //import nanoxml.*;
 
+/**
+ * @author Nestor Manrique
+ * @author Samuel Bartoli
+ *
+ */
+
 public class busThread implements Runnable{
 
     Socket client=null;
@@ -11,6 +17,14 @@ public class busThread implements Runnable{
     List<String []> Cert;
     int type;
 
+    /**
+    * Constructor de la clase
+    * @param client: socket del cliente.
+    * @param serv: lista de servidores
+    * @param cli: lista de clientes.
+    * @param cert: lista con los nombres de los certificados 
+    *
+    */
     public busThread(Socket client, List<String []> serv, List<String []> cli, List<String[]> cert, int f){
         this.client=client;
         this.Serv=serv;
@@ -19,6 +33,10 @@ public class busThread implements Runnable{
         this.type=f;
     }
 
+    /**
+    *
+    *
+    */ 
     public busThread(List<String []> serv, List<String []> cli, List<String[]> cert, int f){
         this.Serv=serv;
         this.Cli=cli;
@@ -26,11 +44,19 @@ public class busThread implements Runnable{
         this.type=f;
     }
 
+    /**
+    *
+    *
+    */ 
     public busThread(List<String []> serv, int f){
         this.Serv=serv;
         this.type=f;
     } 
 
+    /**
+    *
+    *
+    */ 
     public void certEst(String cert){
         Certf c = new Certf();
         String[] cert_= new String[2];
@@ -55,6 +81,10 @@ public class busThread implements Runnable{
         }
     }
 
+    /**
+    *
+    *
+    */ 
     public void cliEst(String[] cliente){
         int h = 0;
 
@@ -68,6 +98,10 @@ public class busThread implements Runnable{
 
     }
 
+    /**
+    * Ejecuta el hilo 
+    *
+    */
     public void run(){
 
         if(this.type==2){
