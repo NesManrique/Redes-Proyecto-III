@@ -7,8 +7,6 @@ import java.util.*;
 
 public interface OperBus extends java.rmi.Remote{
     
-    public List<String> OperPrueba(String asd) throws java.rmi.RemoteException;
-
     public int signin(String servhost, int servport) throws java.rmi.RemoteException;
     public void signout(String servhost, int servport) throws java.rmi.RemoteException;
     public int incli(String host) throws java.rmi.RemoteException;
