@@ -3,17 +3,33 @@ import java.io.*;
 import java.util.*;
 //import nanoxml.*;
 
+/**
+ * @author Samuel Bartoli
+ * @author Nestor Manrique
+ *
+ */
+
 public class servThread implements Runnable{
 
     Socket Client;
     List<Certf> Cert;
 
+    /**
+    * Constructor de la clase
+    * @param client: socket de cliente
+    * @param cert: lista de certificados
+    *
+    */
     public servThread(Socket client, List<Certf> cert){
         
         this.Client=client;
         this.Cert = cert;
     }
 
+    /**
+    * Ejecuta los hilos 
+    *
+    */
     public void run(){
 
         try{
@@ -37,7 +53,6 @@ public class servThread implements Runnable{
             
             if(fromBusq!=null && fromBusq.equals("BUSCADOR")){
                 while(!(fromBusq = in.readLine()).equals("ENDBUSCADOR")){
-                    //Certf.log("fromBusq "+fromBusq);
                     //Leo el query
                     query = query+fromBusq;
 
@@ -46,13 +61,6 @@ public class servThread implements Runnable{
                     //Transformo el xml en query manejable
                     c.xml2query(query,q);
 
-                    /*for(int i=0; i<q.size(); i++){
-                        String a[]=q.get(i);
-                        //c.log(a.length);
-                        for(int j=0; j<a.length; j++){
-                            Certf.log(a[j]);
-                        }
-                    }*/
 
                     //Busco los Certificados
                     c.searchCert(q,Cert,encontrados);
